@@ -1,0 +1,11 @@
+{
+    "name": "neo/crs-request",
+    "description": "Send HTTP request to the CRS router easily.",
+    "authors": [
+        {
+            "name": "Neo Ighodaro",
+            "email": "neo@hng.tech"
+        }
+    ],
+    "require": {}
+}
