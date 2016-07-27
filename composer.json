@@ -7,5 +7,6 @@
             "email": "neo@hng.tech"
         }
     ],
+    "license": "MIT",
     "require": {}
 }
