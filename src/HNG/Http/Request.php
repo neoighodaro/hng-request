@@ -22,8 +22,9 @@ class Request {
      *
      * @param RequestInterface $client
      * @param array            $config
+     * @param array            $session
      */
-    public function __construct(RequestInterface $client, array $config = [])
+    public function __construct(RequestInterface $client, array $config = [], $session = null)
     {
         $this->client = $client;
 
@@ -32,6 +33,10 @@ class Request {
             'client_secret' => '12345',
             'base_url'      => 'http://crsapi.dev',
         ], $config);
+
+        if (is_array($session) && ! empty($session)) {
+            $this->setSession($session);
+        }
     }
 
     /**
