@@ -8,6 +8,11 @@
         }
     ],
     "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "HNG\\Http\\": "src/HNG/Http/"
+        }
+    },
     "require": {
         "php": ">=5.5.9",
         "guzzlehttp/guzzle": "~6.0"
