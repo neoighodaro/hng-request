@@ -8,5 +8,8 @@
         }
     ],
     "license": "MIT",
-    "require": {}
+    "require": {
+        "php": ">=5.5.9",
+        "guzzlehttp/guzzle": "~6.0"
+    }
 }
