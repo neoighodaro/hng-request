@@ -56,8 +56,6 @@ class GuzzleRequest implements RequestInterface {
      */
     public function delete($url, array $params = [], array $options = [])
     {
-        $params = array_merge($params, ['_method' => 'DELETE']);
-
         return $this->request('delete', $url, $params, $options);
     }
 
@@ -71,8 +69,6 @@ class GuzzleRequest implements RequestInterface {
      */
     public function put($url, array $params = [], array $options = [])
     {
-        $params = array_merge($params, ['_method' => 'PUT']);
-
         return $this->request('put', $params, $options);
     }
 

@@ -62,6 +62,10 @@ class Request {
      */
     public function post($url, array $params = [], array $options = [])
     {
+        $params = array_merge($params, [
+            'access_token' => $this->getSession('access_token')
+        ]);
+
         return $this->request('POST', $url, $params, $options);
     }
 
@@ -75,6 +79,11 @@ class Request {
      */
     public function delete($url, array $params = [], array $options = [])
     {
+        $params = array_merge($params, [
+            '_method'      => 'DELETE',
+            'access_token' => $this->getSession('access_token')
+        ]);
+
         return $this->request('DELETE', $url, $params, $options);
     }
 
@@ -88,7 +97,12 @@ class Request {
      */
     public function put($url, array $params = [], array $options = [])
     {
-        return $this->request('PUT', $url, $params, $options);
+        $params = array_merge($params, [
+            '_method'      => 'PUT',
+            'access_token' => $this->getSession('access_token')
+        ]);
+
+        return $this->request('POST', $url, $params, $options);
     }
 
     /**
@@ -133,7 +147,9 @@ class Request {
      */
     protected function request($method, $url, array $params = [], array $options = [])
     {
-        $authenticatedUrl = $this->addAccessTokenToUrl($url);
+        if (strtolower($method) === 'get') {
+            $authenticatedUrl = $this->addAccessTokenToUrl($url);
+        }
 
         try {
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
@@ -141,8 +157,10 @@ class Request {
         } catch (Exception\RequiresAuthentication $e) {
             $this->getAccessTokenFromServer();
 
-            // Get new authenticated URL using the new details...
-            $authenticatedUrl = $this->addAccessTokenToUrl($url);
+            if (strtolower($method) === 'get') {
+                // Get new authenticated URL using the new details...
+                $authenticatedUrl = $this->addAccessTokenToUrl($url);
+            }
 
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
             $this->responseCheck($response);
