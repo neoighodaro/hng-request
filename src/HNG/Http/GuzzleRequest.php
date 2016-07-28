@@ -43,7 +43,7 @@ class GuzzleRequest implements RequestInterface {
      */
     public function post($url, array $params = [], array $options = [])
     {
-        return $this->request('post', $params, $options);
+        return $this->request('post', $url, $params, $options);
     }
 
     /**
@@ -69,7 +69,7 @@ class GuzzleRequest implements RequestInterface {
      */
     public function put($url, array $params = [], array $options = [])
     {
-        return $this->request('put', $params, $options);
+        return $this->request('put', $url, $params, $options);
     }
 
     /**

@@ -34,6 +34,9 @@ class Request {
             'base_url'      => 'http://crsapi.dev',
         ], $config);
 
+        // Remove trailing slash...
+        $this->config['base_url'] = rtrim($this->config['base_url'], '/');
+
         if (is_array($session) && ! empty($session)) {
             $this->setSession($session);
         }
@@ -147,11 +150,10 @@ class Request {
      */
     protected function request($method, $url, array $params = [], array $options = [])
     {
-        $authenticatedUrl = $url;
+        // Prepend slash to the url...
+        $url = '/'.ltrim($url, '/');
 
-        if (strtolower($method) === 'get') {
-            $authenticatedUrl = $this->addAccessTokenToUrl($url);
-        }
+        $authenticatedUrl = $this->addAccessTokenToUrl($url);
 
         try {
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
@@ -159,9 +161,13 @@ class Request {
         } catch (Exception\RequiresAuthentication $e) {
             $this->getAccessTokenFromServer();
 
-            if (strtolower($method) === 'get') {
-                // Get new authenticated URL using the new details...
-                $authenticatedUrl = $this->addAccessTokenToUrl($url);
+            $authenticatedUrl = $this->addAccessTokenToUrl($url);
+
+            if (strtolower($method) !== 'get') {
+                $params = array_merge($params, [
+                    '_method'      => strtoupper($method),
+                    'access_token' => $this->getSession('access_token'),
+                ]);
             }
 
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
