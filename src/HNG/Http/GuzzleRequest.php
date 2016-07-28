@@ -43,7 +43,9 @@ class GuzzleRequest implements RequestInterface {
      */
     public function post($url, array $params = [], array $options = [])
     {
-        return $this->request('post', $url, $params, $options);
+        $payload = array_merge($options, ['form_params' => $params]);
+
+        return $this->request('post', $url, $payload);
     }
 
     /**
@@ -56,7 +58,9 @@ class GuzzleRequest implements RequestInterface {
      */
     public function delete($url, array $params = [], array $options = [])
     {
-        return $this->request('delete', $url, $params, $options);
+        $payload = array_merge($options, ['form_params' => $params]);
+
+        return $this->request('delete', $url, $payload);
     }
 
     /**
@@ -69,7 +73,9 @@ class GuzzleRequest implements RequestInterface {
      */
     public function put($url, array $params = [], array $options = [])
     {
-        return $this->request('put', $url, $params, $options);
+        $payload = array_merge($options, ['form_params' => $params]);
+
+        return $this->request('put', $url, $payload);
     }
 
     /**
@@ -78,15 +84,14 @@ class GuzzleRequest implements RequestInterface {
      * @param       $method
      * @param       $url
      * @param array $params
-     * @param array $options
      * @return mixed
      */
-    protected function request($method, $url, array $params = [], array $options = [])
+    protected function request($method, $url, array $params = [])
     {
         if ($method === 'get') {
-            $response = $this->client->get($url, $options);
+            $response = $this->client->get($url, $params);
         } else {
-            $response = $this->client->{$method}($url, $params, $options);
+            $response = $this->client->{$method}($url, $params);
         }
 
         return json_decode((string) $response->getBody());
