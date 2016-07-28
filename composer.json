@@ -11,7 +11,10 @@
     "autoload": {
         "psr-4": {
             "HNG\\Http\\": "src/HNG/Http/"
-        }
+        },
+        "files": [
+            "src/HNG/Support/helpers.php"
+        ]
     },
     "require": {
         "php": ">=5.5.9",
