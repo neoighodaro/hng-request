@@ -12,7 +12,7 @@ if ( ! function_exists('crsRequest'))
      */
     function crsRequest(array $config)
     {
-        if (strtolower($driver) === 'guzzle') {
+        if (strtolower($config['driver']) === 'guzzle') {
             $driver  = new Http\GuzzleRequest([
                 'base_url' => $config['base_url']
             ]);
