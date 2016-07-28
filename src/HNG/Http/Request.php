@@ -18,6 +18,11 @@ class Request {
     protected $session;
 
     /**
+     * @var string
+     */
+    protected $sessionFile;
+
+    /**
      * Request constructor.
      *
      * @param RequestInterface $client
@@ -32,7 +37,12 @@ class Request {
             'client_id'     => '12345',
             'client_secret' => '12345',
             'base_url'      => 'http://crsapi.dev',
+            'storage_path'  => '',
         ], $config);
+
+        if (is_dir($this->config['storage_path']) AND is_readable($this->config['storage_path'])) {
+            $this->sessionFile = rtrim(realpath($this->config['storage_path']), '/').'/tkn.dat';
+        }
 
         // Remove trailing slash...
         $this->config['base_url'] = rtrim($this->config['base_url'], '/');
@@ -115,6 +125,8 @@ class Request {
      */
     public function setSession(array $session)
     {
+        $this->saveSessionLocally($session);
+
         $this->session = (object) $session;
     }
 
@@ -126,6 +138,11 @@ class Request {
      */
     public function getSession($key = null)
     {
+        // If there is no session set then we check internally...
+        if ($this->session === null) {
+            $this->session = $this->getSavedSession();
+        }
+
         if ($key) {
             return is_string($key) && isset($this->session->{$key})
                 ? $this->session->{$key}
@@ -297,5 +314,39 @@ class Request {
     protected function urlHasNoAccessToken($url)
     {
         return strpos($url, 'access_token=') === false;
+    }
+
+    /**
+     * Save session to the session file.
+     *
+     * @param  array  $session
+     * @return void
+     */
+    protected function saveSessionLocally(array $session)
+    {
+        if ($this->sessionFile) {
+            $sessionData = base64_encode(json_encode($session));
+
+            file_put_contents($this->sessionFile, $sessionData);
+        }
+    }
+
+    /**
+     * Get saved session data.
+     *
+     * @return array
+     */
+    protected function getSavedSession()
+    {
+        $session = [];
+
+        if ($this->sessionFile AND file_exists($this->sessionFile)) {
+            $session = json_decode(
+                base64_decode(file_get_contents($this->sessionFile)),
+                true
+            );
+        }
+
+        return (array) $session;
     }
 }
