@@ -147,6 +147,8 @@ class Request {
      */
     protected function request($method, $url, array $params = [], array $options = [])
     {
+        $authenticatedUrl = $url;
+
         if (strtolower($method) === 'get') {
             $authenticatedUrl = $this->addAccessTokenToUrl($url);
         }
