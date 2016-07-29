@@ -143,6 +143,8 @@ class Request {
             $this->session = $this->getSavedSession();
         }
 
+        $this->session = (object) $this->session;
+
         if ($key) {
             return is_string($key) && isset($this->session->{$key})
                 ? $this->session->{$key}
