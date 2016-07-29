@@ -206,7 +206,7 @@ class Request {
      */
     protected function responseCheck($response)
     {
-        if ( ! is_object($response)) {
+        if ( ! is_object($response) OR ! is_array($response)) {
             throw new Exception\RequiresAuthentication("Request requires a JSON object as a response.");
         }
 
