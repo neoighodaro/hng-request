@@ -248,8 +248,7 @@ class Request {
                     break;
             }
         } catch (PhpException $e) {
-            throw $e;
-            // $response = null;
+            $response = null;
         }
 
         return $response;
