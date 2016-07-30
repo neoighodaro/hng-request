@@ -299,7 +299,7 @@ class Request {
         if ($this->urlHasNoAccessToken($url)) {
             $accessToken = $this->getSession('access_token');
 
-            $url = sprintf('%s' . $url, $this->config['base_url']);
+            $url = $this->config['base_url'] . $url;
 
             $query = parse_url($url, PHP_URL_QUERY);
 
