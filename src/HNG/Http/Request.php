@@ -272,11 +272,11 @@ class Request {
     {
         // Generate the authentication URL...
         $authUrl = sprintf(
-            '%s/oauth/authenticate?grant_type=client_credentials&client_id=%s&client_secret=%s&scope=%s',
+            '%s/oauth/authenticate?grant_type=client_credentials&client_id=%s&client_secret=%s&scopes=%s',
             $this->config['base_url'],
             $this->config['client_id'],
             $this->config['client_secret'],
-            $this->config['scopes']
+            rawurlencode($this->config['scopes'])
         );
 
         try {
