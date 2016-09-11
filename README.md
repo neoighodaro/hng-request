@@ -33,6 +33,7 @@ Pull in the package from composer `"neo/crs-request":"1.*"`. Thats all. A sample
             'base_url'      => 'http://crsapi.dev',
             'client_id'     => '12345',
             'client_secret' => 'SUPER_SECRET_CLIENT_SECRET',
+            'scopes'        => ['scope1', 'scope2'],
         ];
 
         // Use Guzzle...
