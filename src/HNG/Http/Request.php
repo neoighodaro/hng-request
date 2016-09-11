@@ -51,7 +51,7 @@ class Request {
         }
 
         // Standardise scopes...
-        $this->config['scopes'] = implode(static::SCOPE_SEPARATOR, $config['scopes']);
+        $this->config['scopes'] = implode(static::SCOPE_SEPARATOR, $this->config['scopes']);
 
         // Remove trailing slash...
         $this->config['base_url'] = rtrim($this->config['base_url'], '/');
