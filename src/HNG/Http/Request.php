@@ -23,6 +23,11 @@ class Request {
     protected $sessionFile;
 
     /**
+     * Scope separator.
+     */
+    const SCOPE_SEPARATOR = ',';
+
+    /**
      * Request constructor.
      *
      * @param RequestInterface $client
@@ -36,13 +41,17 @@ class Request {
         $this->config = array_merge([
             'client_id'     => '12345',
             'client_secret' => '12345',
-            'base_url'      => 'http://crsapi.dev',
+            'base_url'      => 'http://localhost',
+            'scopes'        => [],
             'storage_path'  => '',
         ], $config);
 
         if (is_dir($this->config['storage_path']) AND is_readable($this->config['storage_path'])) {
             $this->sessionFile = rtrim(realpath($this->config['storage_path']), '/').'/tkn.dat';
         }
+
+        // Standardise scopes...
+        $this->config['scopes'] = implode(static::SCOPE_SEPARATOR, $config['scopes']);
 
         // Remove trailing slash...
         $this->config['base_url'] = rtrim($this->config['base_url'], '/');
@@ -263,10 +272,11 @@ class Request {
     {
         // Generate the authentication URL...
         $authUrl = sprintf(
-            '%s/oauth/authenticate?grant_type=client_credentials&client_id=%s&client_secret=%s',
+            '%s/oauth/authenticate?grant_type=client_credentials&client_id=%s&client_secret=%s&scope=%s',
             $this->config['base_url'],
             $this->config['client_id'],
-            $this->config['client_secret']
+            $this->config['client_secret'],
+            $this->config['scopes']
         );
 
         try {
