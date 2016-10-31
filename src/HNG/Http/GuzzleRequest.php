@@ -43,7 +43,17 @@ class GuzzleRequest implements RequestInterface {
      */
     public function post($url, array $params = [], array $options = [])
     {
-        $payload = array_merge($options, ['form_params' => $params]);
+        $multipart = $options['multipart'];
+
+        if($multipart === true){
+            $params_multi = [];
+            foreach ($params as $key => $value) {
+              array_push($params_multi, ['name' => $key, 'contents'=>$value]);
+            }
+            $payload = ['multipart' => $params_multi];
+        }else{
+            $payload = array_merge($options, ['form_params' => $params]);
+        }
 
         return $this->request('post', $url, $payload);
     }
