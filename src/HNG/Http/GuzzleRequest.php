@@ -43,7 +43,7 @@ class GuzzleRequest implements RequestInterface {
      */
     public function post($url, array $params = [], array $options = [])
     {
-        $multipart = $options['multipart'];
+        $multipart = array_get($options, 'multipart', false);
 
         if($multipart === true){
             $params_multi = [];
