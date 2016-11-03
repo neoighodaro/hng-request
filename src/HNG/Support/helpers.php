@@ -1,4 +1,5 @@
 <?php
+namespace HNG\Http;
 
 use HNG\Http;
 
@@ -22,4 +23,22 @@ if ( ! function_exists('crsRequest'))
 
         return new Http\Request($driver, $config);
     }
+}
+
+if (! function_exists('array_get'))
+{
+  /*
+   *
+   * @param array  $data
+   * @param string $key
+   * @param string $default
+   *
+   * @return mixed
+   */
+   function array_get($data, $key, $default = false) {
+     if (!is_array($data)) {
+         return $default;
+     }
+     return isset($data[$key]) ? $data[$key]: $default;
+   }
 }
