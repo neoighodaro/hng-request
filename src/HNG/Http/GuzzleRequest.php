@@ -48,7 +48,11 @@ class GuzzleRequest implements RequestInterface {
         if($multipart === true){
             $params_multi = [];
             foreach ($params as $key => $value) {
-              array_push($params_multi, ['name' => $key, 'contents'=>$value]);
+                if ($key == 'image'){
+                    array_push($params_multi, ['name'=>$value['name'],'contents' => $value['contents'],'filename' => $value['filename']]);
+                }else{
+                    array_push($params_multi, ['name' => $key, 'contents'=>$value]);
+                }
             }
             $payload = ['multipart' => $params_multi];
         }else{
