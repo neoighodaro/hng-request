@@ -67,7 +67,7 @@ class Request {
      * @param        $url
      * @param  array $options
      * @return mixed
-     * @throws Exception\InvalidCredentials
+     * @throws Exception\InvalidRequest
      */
     public function get($url, array $options = [])
     {
@@ -173,7 +173,7 @@ class Request {
      * @param  array $options
      * @return mixed
      * @throws PhpException
-     * @throws Exception\InvalidCredentials
+     * @throws Exception\InvalidRequest
      * @throws Exception\RequiresAuthentication
      */
     protected function request($method, $url, array $params = [], array $options = [])
@@ -210,7 +210,7 @@ class Request {
     /**
      * @param $response
      * @throws PhpException
-     * @throws Exception\InvalidCredentials
+     * @throws Exception\InvalidRequest
      * @throws Exception\RequiresAuthentication
      */
     protected function responseCheck($response)
@@ -226,7 +226,7 @@ class Request {
                     throw new Exception\RequiresAuthentication($errorMessage);
                     break;
                 default:
-                    throw new Exception\InvalidCredentials($errorMessage);
+                    throw new Exception\InvalidRequest($errorMessage);
                     break;
             }
         }
