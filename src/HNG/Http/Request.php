@@ -226,7 +226,7 @@ class Request {
                     throw new Exception\RequiresAuthentication($errorMessage);
                     break;
                 default:
-                    throw new Exception\InvalidRequest($errorMessage);
+                    throw new Exception\InvalidRequest($response, $errorMessage);
                     break;
             }
         }
