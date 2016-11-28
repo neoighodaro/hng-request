@@ -220,7 +220,7 @@ class Request {
         }
 
         if (isset($response->error)) {
-            $errorMessage = $response->error_description;
+            $errorMessage = (isset($response->error_description))? $response->error_description : '';
             switch ($response->error) {
                 case 'access_denied':
                     throw new Exception\RequiresAuthentication($errorMessage);
