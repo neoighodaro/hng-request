@@ -205,7 +205,8 @@ class Request {
             }
 
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
-            $this->responseCheck($response);
+
+            $this->responseCheck($response, ['url' => $authenticatedUrl, 'params' => $params, 'options' => $options]);
         } catch (PhpException $e) {
             throw $e;
         }
@@ -219,9 +220,13 @@ class Request {
      * @throws Exception\InvalidRequest
      * @throws Exception\RequiresAuthentication
      */
-    protected function responseCheck($response)
+    protected function responseCheck($response, $debugData = [])
     {
         if ( ! is_object($response) AND ! is_array($response)) {
+            if ( ! empty($debugData)) {
+                $this->logError(json_encode($debugData));
+            }
+
             throw new Exception\RequiresAuthentication("Request requires a JSON object as a response.");
         }
 
@@ -270,10 +275,22 @@ class Request {
         } catch (\GuzzleHttp\Exception\ServerException $e) {
             $response = @json_decode( (string) $e->getResponse()->getBody(true));
         } catch (PhpException $e) {
+            $this->logError($e->getMessage());
+
             $response = null;
         }
 
         return $response;
+    }
+
+    /**
+     * Log errors.
+     */
+    protected function logError($msg)
+    {
+        $logFile = rtrim(env('STORAGE_PATH').'/logs', '/').'/error.log';
+
+        file_put_contents($logFile, date('Y-m-d h:i:s').': '.$msg, LOCK_EX | FILE_APPEND);
     }
 
     /**
