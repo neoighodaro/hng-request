@@ -272,8 +272,6 @@ class Request {
                     $response = $this->client->get($url, $params);
                     break;
             }
-        } catch (\GuzzleHttp\Exception\ServerException $e) {
-            $response = @json_decode( (string) $e->getResponse()->getBody(true));
         } catch (PhpException $e) {
             $this->logError($e->getMessage());
 
