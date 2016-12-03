@@ -46,7 +46,7 @@ class Request {
             'storage_path'  => '',
         ], $config);
 
-        if (is_dir($this->config['storage_path'])) {
+        if (is_dir($this->config['storage_path']) AND is_readable($this->config['storage_path'])) {
             $this->sessionFile = rtrim(realpath($this->config['storage_path']), '/').'/tkn.dat';
         }
 
@@ -182,6 +182,12 @@ class Request {
         $url = '/'.ltrim($url, '/');
 
         $authenticatedUrl = $this->addAccessTokenToUrl($url);
+
+        if (strpos($authenticatedUrl, 'access_token=no_access_token_set')) {
+            $this->getAccessTokenFromServer();
+
+            $authenticatedUrl = $this->addAccessTokenToUrl($url);
+        }
 
         try {
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
