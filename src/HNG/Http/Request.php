@@ -221,6 +221,11 @@ class Request {
 
         if (isset($response->error)) {
             $errorMessage = (isset($response->error_description))? $response->error_description : '';
+
+            if ($errorMessage === '' && is_string($response->error)) {
+                $errorMessage = $response->error;
+            }
+
             switch ($response->error) {
                 case 'access_denied':
                     throw new Exception\RequiresAuthentication($errorMessage);
@@ -256,6 +261,8 @@ class Request {
                     $response = $this->client->get($url, $params);
                     break;
             }
+        } catch (\GuzzleHttp\Exception\ServerException $e) {
+            $response = @json_decode( (string) $e->getResponse()->getBody(true));
         } catch (PhpException $e) {
             $response = null;
         }
