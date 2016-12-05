@@ -297,7 +297,13 @@ class Request {
 
         $url = $this->authenticatedUrl ? $this->authenticatedUrl : null;
 
-        file_put_contents($logFile, '['.date('Y-m-d h:i:s').']['.$url.']: '.$msg, LOCK_EX | FILE_APPEND);
+        // Format error message
+        $msg = '['.date('Y-m-d h:i:s').']'.PHP_EOL.
+            "\tEndpoint: {$url}".PHP_EOL.
+            "\tError:    {$msg}".PHP_EOL.
+            '---------'.PHP_EOL;
+
+        file_put_contents($logFile, $msg, LOCK_EX | FILE_APPEND);
     }
 
     /**
