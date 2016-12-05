@@ -23,6 +23,11 @@ class Request {
     protected $sessionFile;
 
     /**
+     * @var string
+     */
+    protected $authenticatedUrl;
+
+    /**
      * Scope separator.
      */
     const SCOPE_SEPARATOR = ',';
@@ -257,6 +262,8 @@ class Request {
      */
     protected function sendRequest($method, $url, array $params, array $options)
     {
+        $this->authenticatedUrl = $url;
+
         try {
             switch (strtolower($method)) {
                 case 'post':
@@ -288,7 +295,9 @@ class Request {
     {
         $logFile = rtrim(realpath($this->config['storage_path']).'/logs', '/').'/error.log';
 
-        file_put_contents($logFile, date('Y-m-d h:i:s').': '.$msg, LOCK_EX | FILE_APPEND);
+        $url = $this->authenticatedUrl ? $this->authenticatedUrl : null;
+
+        file_put_contents($logFile, '['.date('Y-m-d h:i:s').']['.$url.']: '.$msg, LOCK_EX | FILE_APPEND);
     }
 
     /**
