@@ -54,3 +54,12 @@ Pull in the package from composer `"neo/crs-request":"1.*"`. Thats all. A sample
         throw $e;
     }
 
+### Debugging
+
+Everytime an error occurs, the error details are logged in the `log` directory of your storage path set above. Here is an example of the logged information:
+
+```
+[2016-12-05 03:16:52]
+Endpoint: http://api.somesite.com/posts
+Error:    cURL error 56: Problem (2) in the Chunked-Encoded data (see http://curl.haxx.se/libcurl/c/libcurl-errors.html)
+```
