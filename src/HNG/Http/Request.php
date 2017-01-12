@@ -293,7 +293,14 @@ class Request {
      */
     protected function logError($msg)
     {
-        $logFile = rtrim(realpath($this->config['storage_path']).'/logs', '/').'/error.log';
+        $logFolder = rtrim(realpath($this->config['storage_path']) . '/logs', '/');
+
+        // Create logs folder if it does not exist
+        if (!is_dir($logFolder)) {
+            mkdir($logFolder);
+        }
+
+        $logFile = $logFolder .'/error.log';
 
         $url = $this->authenticatedUrl ? $this->authenticatedUrl : null;
 
