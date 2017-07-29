@@ -1,6 +1,7 @@
 <?php
 namespace HNG\Http;
 
+use Exception;
 use HNG\Http;
 
 if ( ! function_exists('crsRequest'))
