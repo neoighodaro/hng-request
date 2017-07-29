@@ -36,34 +36,25 @@ class Request {
      * Request constructor.
      *
      * @param RequestInterface $client
-     * @param array            $config
-     * @param array            $session
+     * @param array $config
+     * @param array $session
      */
-    public function __construct(RequestInterface $client, array $config = [], $session = null)
+    public function __construct(array $config = [])
     {
-        $this->client = $client;
-
+        $this->client = new GuzzleRequest($config);
         $this->config = array_merge([
-            'client_id'     => '12345',
+            'client_id' => '12345',
             'client_secret' => '12345',
-            'base_url'      => 'http://localhost',
-            'scopes'        => [],
-            'storage_path'  => '',
+            'base_url' => 'http://localhost',
+            'scopes' => [],
+            'storage_path' => '',
         ], $config);
-
-        if (is_dir($this->config['storage_path']) AND is_readable($this->config['storage_path'])) {
-            $this->sessionFile = rtrim(realpath($this->config['storage_path']), '/').'/tkn.dat';
-        }
 
         // Standardise scopes...
         $this->config['scopes'] = implode(static::SCOPE_SEPARATOR, $this->config['scopes']);
 
         // Remove trailing slash...
         $this->config['base_url'] = rtrim($this->config['base_url'], '/');
-
-        if (is_array($session) && ! empty($session)) {
-            $this->setSession($session);
-        }
     }
 
     /**
