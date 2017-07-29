@@ -1,5 +1,6 @@
 {
-    "name": "neo/crs-request",
+    "name": "shalvah/crs-request",
+    "version": "1.0",
     "description": "Send HTTP request to the CRS router easily.",
     "authors": [
         {
@@ -18,6 +19,7 @@
     },
     "require": {
         "php": ">=5.5.9",
-        "guzzlehttp/guzzle": "~6.0"
+        "guzzlehttp/guzzle": "~6.0",
+        "nesbot/Carbon": "^1.22"
     }
 }
