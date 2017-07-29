@@ -43,8 +43,8 @@ class Request
     {
         // for backward compatibility
         if ($clientOrConfig instanceof RequestInterface) {
-            $this->client = new $clientOrConfig;
-        } else {
+            $this->client = $clientOrConfig;
+        } else if (is_array($clientOrConfig)) {
             $config = $clientOrConfig;
             $this->client = new GuzzleRequest($config);
         }
