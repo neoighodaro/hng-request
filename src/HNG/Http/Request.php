@@ -375,7 +375,10 @@ class Request {
      */
     protected function urlHasNoAccessToken($url)
     {
-        return strpos($url, 'access_token=') === false;
+        $queryString = parse_url($url, PHP_URL_QUERY);
+        $query = [];
+        parse_str($queryString, $query);
+        return !isset($query['access_token']) || empty($query['access_token']);
     }
 
     /**
