@@ -9,10 +9,10 @@ interface RequestInterface {
      * Send a GET request to the URL.
      *
      * @param  $url
-     * @param  $options
+     * @param  $params
      * @return mixed
      */
-    public function get($url, array $options);
+    public function get($url, array $params);
 
     /**
      * Send a POST request to the URL.

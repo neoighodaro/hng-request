@@ -71,9 +71,9 @@ class Request
      * @return mixed
      * @throws Exception\InvalidRequest
      */
-    public function get($url, array $options = [])
+    public function get($url, array $params = [])
     {
-        return $this->request('GET', $url, $options);
+        return $this->request('GET', $url, $params);
     }
 
     /**
