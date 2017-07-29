@@ -37,13 +37,17 @@ class Request
     /**
      * Request constructor.
      *
-     * @param RequestInterface $client
      * @param array $config
-     * @param array $session
      */
-    public function __construct(array $config = [])
+    public function __construct($clientOrConfig = [], $config = null, $session = null)
     {
-        $this->client = new GuzzleRequest($config);
+        // for backward compatibility
+        if ($clientOrConfig instanceof RequestInterface) {
+            $this->client = new $clientOrConfig;
+        } else {
+            $config = $clientOrConfig;
+            $this->client = new GuzzleRequest($config);
+        }
         $this->config = array_merge([
             'client_id' => '12345',
             'client_secret' => '12345',
