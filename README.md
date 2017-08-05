@@ -1,11 +1,11 @@
 # HNG Request
 
-Make requests to the HNG CRS api easily.
+Make requests to the Hotels.ng CRS API easily.
 
 
-### How to use basically
+### How to use
 
-Pull in the package from composer `"neo/crs-request":"1.*"`. That's all. A sample implementation is below.
+Pull in the package from composer `"shalvah/crs-request":"^1.1"`. That's all. A sample implementation is below.
 
 ```php
 // Configuration details
