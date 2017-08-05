@@ -39,15 +39,9 @@ class Request
      *
      * @param array $config
      */
-    public function __construct($clientOrConfig = [], $config = null, $session = null)
+    public function __construct($config = [])
     {
-        // for backward compatibility
-        if ($clientOrConfig instanceof RequestInterface) {
-            $this->client = $clientOrConfig;
-        } else if (is_array($clientOrConfig)) {
-            $config = $clientOrConfig;
-            $this->client = new GuzzleRequest($config);
-        }
+        $this->client = new GuzzleRequest($config);
         $this->config = array_merge([
             'client_id' => '12345',
             'client_secret' => '12345',
@@ -66,8 +60,8 @@ class Request
     /**
      * Send a GET request to the URL.
      *
-     * @param        $url
-     * @param  array $options
+     * @param string $url
+     * @param array $params
      * @return mixed
      * @throws Exception\InvalidRequest
      */
