@@ -1,23 +1,26 @@
 {
-    "name": "neo/crs-request",
-    "description": "Send HTTP request to the CRS router easily.",
+    "name": "shalvah/crs-request",
+    "version": "2.0.0",
+    "description": "Send HTTP requests to the Hotels.ng CRS API easily.",
     "authors": [
         {
             "name": "Neo Ighodaro",
             "email": "neo@hng.tech"
+        },
+        {
+            "name": "Shalvah Adebayo",
+            "email": "shalvah.adebayo@gmail.com"
         }
     ],
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "HNG\\Http\\": "src/HNG/Http/"
-        },
-        "files": [
-            "src/HNG/Support/helpers.php"
-        ]
+            "HNG\\": "src/HNG/"
+        }
     },
     "require": {
         "php": ">=5.5.9",
-        "guzzlehttp/guzzle": "~6.0"
+        "guzzlehttp/guzzle": "~6.0",
+        "nesbot/Carbon": "^1.22"
     }
 }

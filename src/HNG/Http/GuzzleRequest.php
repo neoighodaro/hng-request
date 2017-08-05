@@ -25,12 +25,14 @@ class GuzzleRequest implements RequestInterface {
      * Send a GET request to the URL.
      *
      * @param  $url
-     * @param  $options
+     * @param  $params
      * @return mixed
      */
-    public function get($url, array $options = [])
+    public function get($url, array $params = [])
     {
-        return $this->request('get', $url, $options);
+        // combine parameters appended to the url with those supplied via $params array
+        parse_str(parse_url($url, PHP_URL_QUERY), $queryParams);
+        return $this->request('get', $url, ['query' =>array_merge($queryParams, $params)]);
     }
 
     /**

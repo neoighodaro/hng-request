@@ -2,10 +2,12 @@
 
 namespace HNG\Http;
 
+use Carbon\Carbon;
 use HNG\Http\Exception;
 use Exception as PhpException;
 
-class Request {
+class Request
+{
 
     /**
      * @var RequestInterface
@@ -13,14 +15,14 @@ class Request {
     protected $client;
 
     /**
-     * @var string
+     * @var  \stdClass
      */
-    protected $session;
+    private static $session;
 
     /**
-     * @var string
+     * @var Carbon
      */
-    protected $sessionFile;
+    private static $authenticatedAt;
 
     /**
      * @var string
@@ -35,48 +37,37 @@ class Request {
     /**
      * Request constructor.
      *
-     * @param RequestInterface $client
-     * @param array            $config
-     * @param array            $session
+     * @param array $config
      */
-    public function __construct(RequestInterface $client, array $config = [], $session = null)
+    public function __construct($config = [])
     {
-        $this->client = $client;
-
+        $this->client = new GuzzleRequest($config);
         $this->config = array_merge([
-            'client_id'     => '12345',
+            'client_id' => '12345',
             'client_secret' => '12345',
-            'base_url'      => 'http://localhost',
-            'scopes'        => [],
-            'storage_path'  => '',
+            'base_url' => 'http://localhost',
+            'scopes' => [],
+            'storage_path' => '',
         ], $config);
-
-        if (is_dir($this->config['storage_path']) AND is_readable($this->config['storage_path'])) {
-            $this->sessionFile = rtrim(realpath($this->config['storage_path']), '/').'/tkn.dat';
-        }
 
         // Standardise scopes...
         $this->config['scopes'] = implode(static::SCOPE_SEPARATOR, $this->config['scopes']);
 
         // Remove trailing slash...
         $this->config['base_url'] = rtrim($this->config['base_url'], '/');
-
-        if (is_array($session) && ! empty($session)) {
-            $this->setSession($session);
-        }
     }
 
     /**
      * Send a GET request to the URL.
      *
-     * @param        $url
-     * @param  array $options
+     * @param string $url
+     * @param array $params
      * @return mixed
      * @throws Exception\InvalidRequest
      */
-    public function get($url, array $options = [])
+    public function get($url, array $params = [])
     {
-        return $this->request('GET', $url, $options);
+        return $this->request('GET', $url, $params);
     }
 
     /**
@@ -90,7 +81,7 @@ class Request {
     public function post($url, array $params = [], array $options = [])
     {
         $params = array_merge($params, [
-            'access_token' => $this->getSession('access_token')
+            'access_token' => $this->getToken()
         ]);
 
         return $this->request('POST', $url, $params, $options);
@@ -107,8 +98,8 @@ class Request {
     public function delete($url, array $params = [], array $options = [])
     {
         $params = array_merge($params, [
-            '_method'      => 'DELETE',
-            'access_token' => $this->getSession('access_token')
+            '_method' => 'DELETE',
+            'access_token' => $this->getToken()
         ]);
 
         return $this->request('DELETE', $url, $params, $options);
@@ -125,23 +116,11 @@ class Request {
     public function put($url, array $params = [], array $options = [])
     {
         $params = array_merge($params, [
-            '_method'      => 'PUT',
-            'access_token' => $this->getSession('access_token')
+            '_method' => 'PUT',
+            'access_token' => $this->getToken()
         ]);
 
         return $this->request('POST', $url, $params, $options);
-    }
-
-    /**
-     * Get the access token.
-     *
-     * @param  array $session
-     */
-    public function setSession(array $session)
-    {
-        $this->saveSessionLocally($session);
-
-        $this->session = (object) $session;
     }
 
     /**
@@ -150,30 +129,19 @@ class Request {
      * @param  string $key
      * @return string|object
      */
-    public function getSession($key = null)
+    protected function getSession()
     {
-        // If there is no session set then we check internally...
-        if ($this->session === null) {
-            $this->session = $this->getSavedSession();
+        if (!static::$session || $this->sessionHasExpired()) {
+            $this->renewSession();
         }
-
-        $this->session = (object) $this->session;
-
-        if ($key) {
-            return is_string($key) && isset($this->session->{$key})
-                ? $this->session->{$key}
-                : 'no_access_token_set';
-        }
-
-        return $this->session;
+        return static::$session;
     }
-
 
     /**
      * Send a request to the server.
      *
      * @param        $method
-     * @param        $url
+     * @param  string $url Raltive url
      * @param  array $params
      * @param  array $options
      * @return mixed
@@ -184,28 +152,22 @@ class Request {
     protected function request($method, $url, array $params = [], array $options = [])
     {
         // Prepend slash to the url...
-        $url = '/'.ltrim($url, '/');
-
-        $authenticatedUrl = $this->addAccessTokenToUrl($url);
-
-        if (strpos($authenticatedUrl, 'access_token=no_access_token_set')) {
-            $this->getAccessTokenFromServer();
-
-            $authenticatedUrl = $this->addAccessTokenToUrl($url);
-        }
+        $url = '/' . ltrim($url, '/');
+        $authenticatedUrl = $this->getCompleteUrl(
+            $this->addAccessTokenToUrl($url));
 
         try {
             $response = $this->sendRequest($method, $authenticatedUrl, $params, $options);
             $this->responseCheck($response);
         } catch (Exception\RequiresAuthentication $e) {
-            $this->getAccessTokenFromServer();
-
-            $authenticatedUrl = $this->addAccessTokenToUrl($url);
+            $this->renewSession();
+            $authenticatedUrl = $this->getCompleteUrl(
+                $this->addAccessTokenToUrl($url));
 
             if (strtolower($method) !== 'get') {
                 $params = array_merge($params, [
-                    '_method'      => strtoupper($method),
-                    'access_token' => $this->getSession('access_token'),
+                    '_method' => strtoupper($method),
+                    'access_token' => $this->getToken(),
                 ]);
             }
 
@@ -227,16 +189,16 @@ class Request {
      */
     protected function responseCheck($response, $debugData = [])
     {
-        if ( ! is_object($response) AND ! is_array($response)) {
-            if ( ! empty($debugData)) {
-                $this->logError(json_encode($debugData));
+        if (!is_object($response) AND !is_array($response)) {
+            if (!empty($debugData)) {
+                $this->logError(json_encode($debugData), $response);
             }
 
             throw new Exception\RequiresAuthentication("Request requires a JSON object as a response.");
         }
 
         if (isset($response->error)) {
-            $errorMessage = (isset($response->error_description))? $response->error_description : '';
+            $errorMessage = (isset($response->error_description)) ? $response->error_description : '';
 
             if ($errorMessage === '' && is_string($response->error)) {
                 $errorMessage = $response->error;
@@ -291,7 +253,7 @@ class Request {
     /**
      * Log errors.
      */
-    protected function logError($msg)
+    protected function logError($msg, $response = null)
     {
         $logFolder = rtrim(realpath($this->config['storage_path']) . '/logs', '/');
 
@@ -300,15 +262,16 @@ class Request {
             mkdir($logFolder);
         }
 
-        $logFile = $logFolder .'/error.log';
+        $logFile = $logFolder . '/error.log';
 
         $url = $this->authenticatedUrl ? $this->authenticatedUrl : null;
 
         // Format error message
-        $msg = '['.date('Y-m-d h:i:s').']'.PHP_EOL.
-            "Endpoint: {$url}".PHP_EOL.
-            "Error:    {$msg}".PHP_EOL.
-            '---------'.PHP_EOL;
+        $msg = '[' . date('Y-m-d h:i:s') . ']' . PHP_EOL .
+            "Endpoint: {$url}" . PHP_EOL .
+            "Error:    {$msg}" . PHP_EOL .
+            "Response: ".print_r($response, true). PHP_EOL.
+            '---------' . PHP_EOL;
 
         file_put_contents($logFile, $msg, LOCK_EX | FILE_APPEND);
     }
@@ -316,9 +279,9 @@ class Request {
     /**
      * Get the access token from the server.
      *
-     * @throws Exception
+     * @throws PhpException
      */
-    protected function getAccessTokenFromServer()
+    protected function getNewSessionFromServer()
     {
         // Generate the authentication URL...
         $authUrl = sprintf(
@@ -343,26 +306,33 @@ class Request {
             $session = null;
         }
 
-        if ( ! isset($session->access_token) OR ! isset($session->expires_in) OR ! isset($session->token_type)) {
+        if (!isset($session->access_token) OR !isset($session->expires_in) OR !isset($session->token_type)) {
             throw new Exception\RequiresAuthentication("Invalid client ID and secret.");
         }
-
-        $this->setSession( (array) $session);
+        return $session;
     }
 
     /**
-     * @param $url
+     * @param $url string
+     * @return string Full url
+     */
+    protected function getCompleteUrl($url)
+    {
+        // if the url is already complete, just return it
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        return empty($scheme ) ? $this->config['base_url'] . $url : $url;
+    }
+
+    /**
+     * @param $url string
      * @return string
      */
     protected function addAccessTokenToUrl($url)
     {
         if ($this->urlHasNoAccessToken($url)) {
-            $accessToken = $this->getSession('access_token');
-
-            $url = $this->config['base_url'] . $url;
+            $accessToken = $this->getToken();
 
             $query = parse_url($url, PHP_URL_QUERY);
-
             $url .= ($query ? '&' : '?') . 'access_token=' . $accessToken;
         }
 
@@ -375,40 +345,25 @@ class Request {
      */
     protected function urlHasNoAccessToken($url)
     {
-        return strpos($url, 'access_token=') === false;
+        $queryString = parse_url($url, PHP_URL_QUERY);
+        $query = [];
+        parse_str($queryString, $query);
+        return !isset($query['access_token']) || empty($query['access_token']);
     }
 
-    /**
-     * Save session to the session file.
-     *
-     * @param  array  $session
-     * @return void
-     */
-    protected function saveSessionLocally(array $session)
+    protected function getToken()
     {
-        if ($this->sessionFile) {
-            $sessionData = base64_encode(json_encode($session));
-
-            file_put_contents($this->sessionFile, $sessionData);
-        }
+        return $this->getSession()->access_token;
     }
 
-    /**
-     * Get saved session data.
-     *
-     * @return array
-     */
-    protected function getSavedSession()
+    protected function sessionHasExpired()
     {
-        $session = [];
+        return static::$authenticatedAt->addSeconds(static::$session->expires_in)->greaterThan(Carbon::now());
+    }
 
-        if ($this->sessionFile AND file_exists($this->sessionFile)) {
-            $session = json_decode(
-                base64_decode(file_get_contents($this->sessionFile)),
-                true
-            );
-        }
-
-        return (array) $session;
+    protected function renewSession()
+    {
+        static::$session = $this->getNewSessionFromServer();
+        static::$authenticatedAt = Carbon::now();
     }
 }
