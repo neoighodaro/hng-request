@@ -5,7 +5,7 @@ Make requests to the Hotels.ng CRS API easily.
 
 ### How to use
 
-Pull in the package from composer `"shalvah/crs-request":"^1.1"`. That's all. A sample implementation is below.
+Pull in the package from composer `"shalvah/crs-request":"^2.0"`. That's all. A sample implementation is below.
 
 ```php
 // Configuration details
